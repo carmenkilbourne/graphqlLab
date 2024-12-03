@@ -27,6 +27,7 @@ export const resolvers = {
       },
     ): Promise<Vehicle> => {
       const { name, manufacturer, year} = args;
+      
       const { insertedId } = await context.vehiclesCollection.insertOne({
         name,
         manufacturer,
