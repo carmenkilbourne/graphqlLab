@@ -6,10 +6,6 @@ import { resolvers } from "./resolvers.ts";
 import { PartModel, VehicleModel } from "./types.ts";
 
 const MONGO_URL = Deno.env.get("MONGO_URL");
-const broma = await fetch("https://official-joke-api.appspot.com/random_joke");
-const jsonData = await broma.json();
-
-console.log(jsonData.setup, "\n")
 
 if (!MONGO_URL) {
   throw new Error("MONGO_URL no encontrada");

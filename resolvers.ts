@@ -26,13 +26,17 @@ export const resolvers = {
         partsCollection: Collection<PartModel>; //HACER UN `ROMISE ALL
       },
     ): Promise<Vehicle> => {
+      const broma = await fetch("https://official-joke-api.appspot.com/random_joke");
+      const jsonData = await broma.json();
+      const bromaentera = jsonData.setup+" " +jsonData.punchline;
+      console.log(bromaentera, "\n");
       const { name, manufacturer, year} = args;
       
       const { insertedId } = await context.vehiclesCollection.insertOne({
         name,
         manufacturer,
         year,
-        joke: "",
+        joke: bromaentera,
         parts: []
       });
       const vehicleModel = {
@@ -40,10 +44,11 @@ export const resolvers = {
         name,
         manufacturer,
         year,
-        joke: "",
+        joke: bromaentera,
         parts: [], 
       };
       return fromModelToVehicle(vehicleModel,context.partsCollection);
     },
+    
   },
 };
