@@ -22,4 +22,5 @@ export const fromModelToPart = (model: PartModel): Part => ({
   id: model._id!.toString(),
   name: model.name,
   price: model.price,
+  vehicleId: model.vehicleId!.toString(),
 });

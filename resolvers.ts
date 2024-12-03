@@ -1,10 +1,10 @@
 import { Collection, ObjectId } from "mongodb";
-import { PartModel, Vehicle, VehicleModel } from "./types.ts";
-import { fromModelToVehicle } from "./utils.ts";
+import { PartModel, Vehicle, VehicleModel,Part } from "./types.ts";
+import { fromModelToPart, fromModelToVehicle } from "./utils.ts";
 
 export const resolvers = {
   Query: {
-    vehicles: async (
+    /* vehicles: async (
       _: unknown,
       __: unknown,
       context: { vehicleCollection: Collection<VehicleModel>;
@@ -15,9 +15,40 @@ export const resolvers = {
       return vehiclesModel.map((vehiclemodel) =>
         fromModelToVehicle(vehiclemodel,context.partsCollection)
       );
-    },
+    }, */
   },
   Mutation: {
+    addPart: async (
+      _: unknown,
+      args: { name: string; price: number;  vehicleId:string; },
+      context: {
+        partsCollection: Collection<PartModel>;
+        vehicleCollection: Collection<VehicleModel>;
+      },
+    ): Promise<Part> => {
+      const { name, price, vehicleId} = args;
+      const objeto = new ObjectId(vehicleId);
+
+      const { insertedId } = await context.partsCollection.insertOne({
+        name,
+        price,
+        vehicleId,
+      });
+      const partModel = {
+        _id: insertedId,
+        name,
+        price,
+        vehicleId,
+      };
+      const { modifiedCount } =await context.vehicleCollection.updateOne(
+        {_id: new ObjectId(vehicleId)},
+        {$set:{name:"aidon"}});
+        if (modifiedCount === 0) {
+          console.log("no modificado");
+                }
+
+      return fromModelToPart(partModel);
+    },
     addVehicle: async (
       _: unknown,
       args: { name: string; manufacturer: string; year: number },

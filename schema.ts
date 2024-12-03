@@ -5,12 +5,13 @@ type Vehicle {
   manufacturer: String!
   year:Int!
   joke:String
-  parts:Part
+  parts:[Part]
 }
 type Part {
   id: ID!
   name: String!
   price:Int!
+  vehicleId:String!
 }
 
 type Query {
@@ -24,8 +25,8 @@ type Query {
 
 type Mutation {
     addVehicle(name: String!, manufacturer: String!,year:Int!): Vehicle!
-    addPart(name: String!,price:Int!,id: ID!):Part
-    updateVehicle(id: ID!,name: String!,manufacturer: String!,year:Int!):Vehicle!
+    addPart(name: String!,price:Int!,  vehicleId:String!):Part
+    updateVehicle(id: ID!,name: String!,manufacturer: String!,year:Int!,vehicleId:String!):Vehicle!
     deletePart(id: ID!): Vehicle
 }
 `;

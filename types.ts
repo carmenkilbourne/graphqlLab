@@ -20,8 +20,10 @@ export type Part ={
     id:string;
     name:string;
     price:number;
+    vehicleId:string;
 }
 export type PartModel =OptionalId<{
     name:string;
     price:number;
+    vehicleId:ObjectId;
 }>
