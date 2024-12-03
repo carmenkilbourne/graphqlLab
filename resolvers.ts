@@ -7,13 +7,13 @@ export const resolvers = {
     vehicles: async (
       _: unknown,
       __: unknown,
-      context: { vehicleCollection: Collection<VehicleModel>,
-        partCollection: Collection<PartModel>
+      context: { vehicleCollection: Collection<VehicleModel>;
+        partsCollection: Collection<PartModel>;
        },
     ): Promise<Vehicle[]> => {
       const vehiclesModel = await context.vehicleCollection.find().toArray();
       return vehiclesModel.map((vehiclemodel) =>
-        fromModelToVehicle(vehiclemodel,partCollection)
+        fromModelToVehicle(vehiclemodel,context.partsCollection)
       );
     },
   },

@@ -16,7 +16,7 @@ await mongoClient.connect();
 
 
 const client = new MongoClient(MONGO_URL);
-const db = client.db("nebrijadb");
+const db = client.db("practica4");
 const vehiclesCollection = db.collection<VehicleModel>("vehiculos");
 const partsCollection = db.collection<PartModel>("parts");
 

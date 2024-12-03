@@ -5,6 +5,7 @@ type Vehicle {
   manufacturer: String!
   year:Int!
   joke:String
+  parts:Part
 }
 type Part {
   id: ID!
