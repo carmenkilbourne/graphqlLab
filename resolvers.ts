@@ -80,6 +80,48 @@ export const resolvers = {
       };
       return fromModelToVehicle(vehicleModel,context.partsCollection);
     },
+    //sin comprobar el funcionamiento 
+    updateVehicle: async (
+      _:unknown,
+      args:{id:string,name:string,manufacturer:string,year:number},
+      context:{
+        vehiclesCollection: Collection<VehicleModel>;
+      },
+      //devuelvo ese objeto porque vehicle no cuadra con los valores que tiene que devolver la mutacion
+    ):Promise<{id:string,name:string,manufacturer:string,year:number} | null> => {
+      const id = args.id;
+      const {name, manufacturer, year}= args;
+      
+      const vehiclemodificar = await context.vehiclesCollection.updateOne({
+        _id: new ObjectId(id),
+      },
+      {$set:{name,manufacturer,year}});
+
+      if (!vehiclemodificar) {
+        return null;
+      }
+      return {id:id,name:name,manufacturer:manufacturer,year:year}
+
+    },
+    //sin comprobar el funcionamiento
+    deletePart: async (
+      _:unknown,
+      args:{id:string},
+      context:{
+        vehiclesCollection: Collection<VehicleModel>,
+        partsCollection: Collection<PartModel>;
+      },
+    ):Promise<{id:string,name:string} | null> =>{
+      const id = args.id;
+      //faltaria actualizar el array de parts de vehiculo quitardo el id de la pieza a eliminar
+      const deletePart = await context.partsCollection.findOneAndDelete({
+        _id: new ObjectId(id),
+      });
+      if(!deletePart){
+        return null;
+      }
+      return {id:id,name:deletePart.name};
+    }
     
   },
 };
