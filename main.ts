@@ -5,11 +5,7 @@ import { startStandaloneServer } from "@apollo/server/standalone";
 import { resolvers } from "./resolvers.ts";
 import { PartModel, VehicleModel } from "./types.ts";
 
-const MONGO_URL = Deno.env.get("MONGO_URL");
-
-if (!MONGO_URL) {
-  throw new Error("MONGO_URL no encontrada");
-}
+const MONGO_URL = "mongodb+srv://ckilbourne:12345@nebrija-cluster.cumaf.mongodb.net/?retryWrites=true&w=majority&appName=Nebrija-Cluster";
 
 const mongoClient = new MongoClient(MONGO_URL);
 await mongoClient.connect();

@@ -94,6 +94,27 @@ export const resolvers = {
         ),
       );
     },
+    
+    partsByVehicle: async (
+      _: unknown, 
+      { vehicleId }: { vehicleId: string },
+      context: {
+        partsCollection: Collection<PartModel>;
+      },
+    ): Promise<Part[]|null> => {
+      const partsModel = await context.partsCollection.find({
+        vehicleId:new ObjectId(vehicleId),
+      }).toArray();
+      if(!partsModel){
+        console.log("no hay vehiculo de ese manufacterer");
+        return null;
+      }
+      return await Promise.all(
+        partsModel.map((partModel) =>
+          fromModelToPart(partModel)
+        ),
+      );
+    },
   },
 
   Mutation: {
@@ -202,16 +223,25 @@ export const resolvers = {
         vehiclesCollection: Collection<VehicleModel>;
         partsCollection: Collection<PartModel>;
       },
-    ): Promise<{ id: string; name: string } | null> => {
+    ): Promise<Part  | null> => {
       const id = args.id;
+      const deletePartVehicle = await context.vehiclesCollection.updateOne(
+        { parts: new ObjectId(id) }, 
+       { $pull: { parts: new ObjectId(id) } } 
+      );
+      if (!deletePartVehicle) {
+        console.log("No existe esta parte");
+        return null;
+      }
       //faltaria actualizar el array de parts de vehiculo quitardo el id de la pieza a eliminar
       const deletePart = await context.partsCollection.findOneAndDelete({
         _id: new ObjectId(id),
       });
       if (!deletePart) {
+        console.log("No existe esta parte");
         return null;
       }
-      return { id: id, name: deletePart.name };
+      return fromModelToPart(deletePart);
     },
   },
 };
