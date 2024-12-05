@@ -1,51 +1,117 @@
 import { Collection, ObjectId } from "mongodb";
-import { PartModel, Vehicle, VehicleModel,Part } from "./types.ts";
+import { Part, PartModel, Vehicle, VehicleModel } from "./types.ts";
 import { fromModelToPart, fromModelToVehicle } from "./utils.ts";
 
 export const resolvers = {
   Query: {
-    /* vehicles: async (
+    vehicles: async (
       _: unknown,
       __: unknown,
-      context: { vehicleCollection: Collection<VehicleModel>;
+      context: {
+        vehiclesCollection: Collection<VehicleModel>;
         partsCollection: Collection<PartModel>;
-       },
+      },
     ): Promise<Vehicle[]> => {
-      const vehiclesModel = await context.vehicleCollection.find().toArray();
-      return vehiclesModel.map((vehiclemodel) =>
-        fromModelToVehicle(vehiclemodel,context.partsCollection)
+      const vehiclesModel = await context.vehiclesCollection.find().toArray();
+      return await Promise.all(
+        vehiclesModel.map((vehiclemodel) =>
+          fromModelToVehicle(vehiclemodel, context.partsCollection)
+        ),
       );
-    }, */
+    },
+    vehicle: async (
+      _: unknown,
+      { id }: { id: string },
+      context: {
+        vehiclesCollection: Collection<VehicleModel>;
+        partsCollection: Collection<PartModel>;
+      },
+    ): Promise<Vehicle| null> => {
+      const vehiclesModel = await context.vehiclesCollection.findOne({
+        _id: new ObjectId(id),
+      });
+      if(!vehiclesModel){
+        console.log("no hay vehiculo con esa id");
+        return null;
+      }
+      return fromModelToVehicle(vehiclesModel, context.partsCollection);
+    },
+    parts: async (
+      _: unknown,
+      __: unknown,
+      context: {
+        partsCollection: Collection<PartModel>;
+      },
+    ): Promise<Part[]> => {
+      const partsModel = await context.partsCollection.find().toArray();
+      return await Promise.all(
+        partsModel.map((partmodel) =>
+          fromModelToPart(partmodel)
+        ),
+      );
+    },
+    vehiclesByManufacturer: async (
+      _: unknown,
+      { manufacturer }: { manufacturer: string },
+      context: {
+        vehiclesCollection: Collection<VehicleModel>;
+        partsCollection: Collection<PartModel>;
+      },
+    ): Promise<Vehicle[]|null> => {
+      const vehiclesModel = await context.vehiclesCollection.find({
+        manufacturer,
+      }).toArray();
+      if(!vehiclesModel){
+        console.log("no hay vehiculo de ese manufacterer");
+        return null;
+      }
+      return await Promise.all(
+        vehiclesModel.map((vehiclemodel) =>
+          fromModelToVehicle(vehiclemodel, context.partsCollection)
+        ),
+      );
+    },
   },
+
   Mutation: {
     addPart: async (
       _: unknown,
-      args: { name: string; price: number;  vehicleId:string; },
+      args: { name: string; price: number; vehicleId: string },
       context: {
         partsCollection: Collection<PartModel>;
-        vehicleCollection: Collection<VehicleModel>;
+        vehiclesCollection: Collection<VehicleModel>;
       },
     ): Promise<Part> => {
-      const { name, price, vehicleId} = args;
-      const objeto = new ObjectId(vehicleId);
+      const { name, price, vehicleId } = args;
+      const vehicle = await context.vehiclesCollection.findOne({
+        _id: new ObjectId(vehicleId),
+      });
+
+      if (!vehicle) {
+         console.log("no existe vehiculo al cual le puedo asignar la parte");
+      }
 
       const { insertedId } = await context.partsCollection.insertOne({
         name,
         price,
-        vehicleId,
+        vehicleId: new ObjectId(vehicleId),
       });
+
       const partModel = {
         _id: insertedId,
         name,
         price,
-        vehicleId,
+        vehicleId: new ObjectId(vehicleId),
       };
-      const { modifiedCount } =await context.vehicleCollection.updateOne(
-        {_id: new ObjectId(vehicleId)},
-        {$set:{name:"aidon"}});
-        if (modifiedCount === 0) {
-          console.log("no modificado");
-                }
+
+      const { modifiedCount } = await context.vehiclesCollection.updateOne(
+        { _id: new ObjectId(vehicleId) },
+        { $push: { parts: insertedId } },
+      );
+
+      if (modifiedCount === 0) {
+        console.log("no modificado");
+      }
 
       return fromModelToPart(partModel);
     },
@@ -57,18 +123,20 @@ export const resolvers = {
         partsCollection: Collection<PartModel>; //HACER UN `ROMISE ALL
       },
     ): Promise<Vehicle> => {
-      const broma = await fetch("https://official-joke-api.appspot.com/random_joke");
+      const broma = await fetch(
+        "https://official-joke-api.appspot.com/random_joke",
+      );
       const jsonData = await broma.json();
-      const bromaentera = jsonData.setup+" " +jsonData.punchline;
-      console.log(bromaentera, "\n");
-      const { name, manufacturer, year} = args;
-      
+      const bromaentera = jsonData.setup + " " + jsonData.punchline;
+      //console.log(bromaentera, "\n");
+      const { name, manufacturer, year } = args;
+
       const { insertedId } = await context.vehiclesCollection.insertOne({
         name,
         manufacturer,
         year,
         joke: bromaentera,
-        parts: []
+        parts: [],
       });
       const vehicleModel = {
         _id: insertedId,
@@ -76,52 +144,51 @@ export const resolvers = {
         manufacturer,
         year,
         joke: bromaentera,
-        parts: [], 
+        parts: [],
       };
-      return fromModelToVehicle(vehicleModel,context.partsCollection);
+      return fromModelToVehicle(vehicleModel, context.partsCollection);
     },
-    //sin comprobar el funcionamiento 
+    //sin comprobar el funcionamiento
     updateVehicle: async (
-      _:unknown,
-      args:{id:string,name:string,manufacturer:string,year:number},
-      context:{
+      _: unknown,
+      args: { id: string; name: string; manufacturer: string; year: number },
+      context: {
         vehiclesCollection: Collection<VehicleModel>;
       },
       //devuelvo ese objeto porque vehicle no cuadra con los valores que tiene que devolver la mutacion
-    ):Promise<{id:string,name:string,manufacturer:string,year:number} | null> => {
+    ): Promise<
+      { id: string; name: string; manufacturer: string; year: number } | null
+    > => {
       const id = args.id;
-      const {name, manufacturer, year}= args;
-      
+      const { name, manufacturer, year } = args;
+
       const vehiclemodificar = await context.vehiclesCollection.updateOne({
         _id: new ObjectId(id),
-      },
-      {$set:{name,manufacturer,year}});
+      }, { $set: { name, manufacturer, year } });
 
       if (!vehiclemodificar) {
         return null;
       }
-      return {id:id,name:name,manufacturer:manufacturer,year:year}
-
+      return { id: id, name: name, manufacturer: manufacturer, year: year };
     },
     //sin comprobar el funcionamiento
     deletePart: async (
-      _:unknown,
-      args:{id:string},
-      context:{
-        vehiclesCollection: Collection<VehicleModel>,
+      _: unknown,
+      args: { id: string },
+      context: {
+        vehiclesCollection: Collection<VehicleModel>;
         partsCollection: Collection<PartModel>;
       },
-    ):Promise<{id:string,name:string} | null> =>{
+    ): Promise<{ id: string; name: string } | null> => {
       const id = args.id;
       //faltaria actualizar el array de parts de vehiculo quitardo el id de la pieza a eliminar
       const deletePart = await context.partsCollection.findOneAndDelete({
         _id: new ObjectId(id),
       });
-      if(!deletePart){
+      if (!deletePart) {
         return null;
       }
-      return {id:id,name:deletePart.name};
-    }
-    
+      return { id: id, name: deletePart.name };
+    },
   },
 };
