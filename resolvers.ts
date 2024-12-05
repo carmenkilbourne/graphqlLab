@@ -71,6 +71,29 @@ export const resolvers = {
         ),
       );
     },
+    vehiclesByYearRange: async (
+      _: unknown,
+      args:{ startYear: number;endYear:number},
+      context: {
+        vehiclesCollection: Collection<VehicleModel>;
+        partsCollection: Collection<PartModel>;
+      },
+    ): Promise<Vehicle[]|null> => {
+      const { startYear, endYear } = args;
+      const vehiclesModel = await context.vehiclesCollection.find(
+        {year:{ $gt: startYear, $lt: endYear}}
+
+      ).toArray();
+      if(!vehiclesModel){
+        console.log("no hay vehiculo en este periodo de tiempo");
+        return null;
+      }
+      return await Promise.all(
+        vehiclesModel.map((vehiclemodel) =>
+          fromModelToVehicle(vehiclemodel, context.partsCollection)
+        ),
+      );
+    },
   },
 
   Mutation: {

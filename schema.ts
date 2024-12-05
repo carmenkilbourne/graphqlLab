@@ -19,6 +19,7 @@ type Query {
   vehicle(id: ID!): Vehicle
   parts:[Part!]!
   vehiclesByManufacturer(manufacturer:String!):[Vehicle]!
+  vehiclesByYearRange(startYear:Int!, endYear:Int!):[Vehicle]!
   partsByVehicle(id: ID!):Part
 
 }
