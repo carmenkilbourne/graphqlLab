@@ -25,4 +25,5 @@ const { url } = await startStandaloneServer(server, {
   context: async () => ({ vehiclesCollection,partsCollection}),
 });
 
+
 console.info(`Server escuchando en ${url}`);
