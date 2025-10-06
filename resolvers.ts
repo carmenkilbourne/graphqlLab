@@ -164,7 +164,7 @@ export const resolvers = {
       args: { name: string; manufacturer: string; year: number },
       context: {
         vehiclesCollection: Collection<VehicleModel>;
-        partsCollection: Collection<PartModel>; //HACER UN `ROMISE ALL
+        partsCollection: Collection<PartModel>; 
       },
     ): Promise<Vehicle> => {
       const broma = await fetch(
@@ -172,7 +172,6 @@ export const resolvers = {
       );
       const jsonData = await broma.json();
       const bromaentera = jsonData.setup + " " + jsonData.punchline;
-      //console.log(bromaentera, "\n");
       const { name, manufacturer, year } = args;
 
       const { insertedId } = await context.vehiclesCollection.insertOne({
@@ -192,7 +191,6 @@ export const resolvers = {
       };
       return fromModelToVehicle(vehicleModel, context.partsCollection);
     },
-    //sin comprobar el funcionamiento
     updateVehicle: async (
       _: unknown,
       args: { id: string; name: string; manufacturer: string; year: number },
