@@ -25,17 +25,26 @@ Un servidor GraphQL backend en Deno/TypeScript para gestionar vehículos y parte
 
 ## 🚀 Setup Rápido
 1. **Clona el Repo**:
+ ```bash
+   git clone https://github.com/carmenkilbourne/graphqlLab.git
+   cd graphqlLab
+   ```
 
 2. **Configura .env** (no commitees—añade a .gitignore):
 
 3. **Instala Dependencias** (Deno maneja imports dinámicos—no npm):
 
       "@apollo/server": "https://deno.land/x/apollo_server@4.10.5/mod.ts"
-      {
-  "name": "Toyota Prius",
-  "manufacturer": "Toyota",
-  "year": 2023
-}A
-![alt text](image.png)
-![alt text](image-1.png)
-![alt text](image-2.png)
+      
+## Resultados de algunas de las querys
+### Mostrar todos los vehiculos
+<img src="image.png" alt="Ejemplo de mutation addVehicle en Postman – Respuesta con joke aleatoria" width="70%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: block; margin: 20px auto;">
+
+### Mostrar todas las partes 
+<img src="image-1.png" alt="Ejemplo de mutation addVehicle en Postman – Respuesta con joke aleatoria" width="70%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: block; margin: 20px auto;">
+
+### Mostrar vehiculos filtrados por manufacter
+<img src="image-2.png" alt="Ejemplo de mutation addVehicle en Postman – Respuesta con joke aleatoria" width="70%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: block; margin: 20px auto;">
+
+### Agregar vehiculo a mi lista de vehiculos
+<img src="image-3.png" alt="Ejemplo de mutation addVehicle en Postman – Respuesta con joke aleatoria" width="70%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: block; margin: 20px auto;">
